@@ -13,23 +13,40 @@ class ManifestReader {
             try {
                 $content = Get-Content $f.FullName -Raw | ConvertFrom-Json
                 foreach ($item in $content) {
+                    $id       = if ($item.PSObject.Properties['id']) { $item.id } else { "" }
+                    $name     = if ($item.PSObject.Properties['name']) { $item.name } else { $id }
+                    $category = if ($item.PSObject.Properties['category']) { $item.category } else { "General" }
+                    $source   = if ($item.PSObject.Properties['source']) { $item.source } else { "ninite" }
+                    $desc     = if ($item.PSObject.Properties['desc']) { $item.desc } else { $name }
+                    $version  = if ($item.PSObject.Properties['version']) { $item.version } else { "" }
+                    $url      = if ($item.PSObject.Properties['url']) { $item.url } else { "" }
+                    $repo     = if ($item.PSObject.Properties['repo']) { $item.repo } else { "" }
+                    $format   = if ($item.PSObject.Properties['format']) { $item.format } else { "" }
+                    $silent   = if ($item.PSObject.Properties['silentArgs']) { $item.silentArgs } else { "" }
+                    $path     = if ($item.PSObject.Properties['installPath']) { $item.installPath } else { "" }
+                    $recipe   = if ($item.PSObject.Properties['recipe']) { $item.recipe } else { "" }
+                    $pkgName  = if ($item.PSObject.Properties['packageName']) { $item.packageName } else { "" }
+                    $check    = if ($item.PSObject.Properties['checkCommand']) { $item.checkCommand } else { "" }
+                    $verCmd   = if ($item.PSObject.Properties['versionCommand']) { $item.versionCommand } else { "" }
+                    $feat     = if ($item.PSObject.Properties['featured']) { [bool]$item.featured } else { $false }
+
                     $list.Add([PSCustomObject]@{
-                        Id             = $item.id
-                        Name           = $item.name
-                        Category       = if ($item.category) { $item.category } else { "General" }
-                        Source         = if ($item.source) { $item.source } else { "ninite" }
-                        Desc           = if ($item.desc) { $item.desc } else { $item.name }
-                        Version        = $item.version
-                        Url            = $item.url
-                        Repo           = $item.repo
-                        Format         = $item.format
-                        SilentArgs     = $item.silentArgs
-                        InstallPath    = $item.installPath
-                        Recipe         = $item.recipe
-                        PackageName    = $item.packageName
-                        CheckCommand   = $item.checkCommand
-                        VersionCommand = $item.versionCommand
-                        Featured       = if ($item.featured) { $true } else { $false }
+                        Id             = $id
+                        Name           = $name
+                        Category       = $category
+                        Source         = $source
+                        Desc           = $desc
+                        Version        = $version
+                        Url            = $url
+                        Repo           = $repo
+                        Format         = $format
+                        SilentArgs     = $silent
+                        InstallPath    = $path
+                        Recipe         = $recipe
+                        PackageName    = $pkgName
+                        CheckCommand   = $check
+                        VersionCommand = $verCmd
+                        Featured       = $feat
                     })
                 }
             }

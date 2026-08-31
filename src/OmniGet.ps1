@@ -34,6 +34,7 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $OmniRoot  = (Resolve-Path (Join-Path $ScriptDir "..")).Path
 $ManifestsDir = Join-Path $OmniRoot "manifests"
 
+. "$OmniRoot/src/UI/SearchEngine.ps1"
 . "$OmniRoot/src/Core/Engine.ps1"
 . "$OmniRoot/src/Core/ManifestReader.ps1"
 . "$OmniRoot/src/UI/TuiApp.ps1"
@@ -142,7 +143,8 @@ function Main {
         $results = [SearchEngine]::Filter($Search, $allPackages)
         Write-Host "`nSearch results for '$Search' ($($results.Count) matches):" -ForegroundColor Cyan
         foreach ($r in $results) {
-            Write-Host "  • {0,-18} [{1,-6}] - {2}" -f $r.Id, $r.Source.ToUpper(), $r.Desc -ForegroundColor White
+            $line = "  • {0,-18} [{1,-6}] - {2}" -f $r.Id, $r.Source.ToUpper(), $r.Desc
+            Write-Host $line -ForegroundColor White
         }
         return
     }
@@ -157,7 +159,8 @@ function Main {
         }
         Write-Host "`nOmniGet Package List ($($filtered.Count) packages):" -ForegroundColor Cyan
         foreach ($p in $filtered) {
-            Write-Host "  • {0,-20} [{1,-6}] {2}" -f $p.Id, $p.Source.ToUpper(), $p.Name -ForegroundColor White
+            $line = "  • {0,-20} [{1,-6}] {2}" -f $p.Id, $p.Source.ToUpper(), $p.Name
+            Write-Host $line -ForegroundColor White
         }
         return
     }

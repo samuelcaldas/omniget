@@ -38,6 +38,7 @@ class TuiApp {
             6 { return @($items | Where-Object { $_.Category -like "*Media*" -or $_.Category -like "*Utilities*" -or $_.Category -like "*Compression*" }) }
             default { return $items.ToArray() }
         }
+        return $items.ToArray()
     }
 
     [string] ReadSearchInput() {
@@ -64,7 +65,7 @@ class TuiApp {
     [string[]] Run() {
         $canRawUI = $true
         try { $null = [Console]::KeyAvailable } catch { $canRawUI = $false }
-        if (-not $canRawUI) { return $this.Selected.ToArray() }
+        if (-not $canRawUI) { return @($this.Selected) }
 
         [Console]::CursorVisible = $false
         try {
@@ -207,7 +208,7 @@ class TuiApp {
                         }
                     }
                     ([ConsoleKey]::Enter) {
-                        return $this.Selected.ToArray()
+                        return @($this.Selected)
                     }
                     ([ConsoleKey]::Q) {
                         return @()
@@ -218,5 +219,6 @@ class TuiApp {
         finally {
             [Console]::CursorVisible = $true
         }
+        return @()
     }
 }
