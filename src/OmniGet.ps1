@@ -34,9 +34,9 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $OmniRoot  = (Resolve-Path (Join-Path $ScriptDir "..")).Path
 $ManifestsDir = Join-Path $OmniRoot "manifests"
 
-. "$OmniRoot\src\Core\Engine.ps1"
-. "$OmniRoot\src\Core\ManifestReader.ps1"
-. "$OmniRoot\src\UI\TuiApp.ps1"
+. "$OmniRoot/src/Core/Engine.ps1"
+. "$OmniRoot/src/Core/ManifestReader.ps1"
+. "$OmniRoot/src/UI/TuiApp.ps1"
 
 function Deploy-OmniGetEnvironment {
     Write-Host "[INFO] Deploying OmniGet (og) to system environment..." -ForegroundColor Cyan
@@ -109,7 +109,7 @@ function Execute-PackageBatch {
     foreach ($kv in $grouped) {
         $sourceName = $kv.Key
         $packages = $kv.Value.ToArray()
-        $provider = [ProviderFactory]::GetProvider($sourceName)
+        $provider = Get-OmniProvider -SourceName $sourceName
 
         Write-Host "`n>>> Running Provider: $($provider.DisplayName) ($($packages.Count) packages)..." -ForegroundColor Cyan
         try {
