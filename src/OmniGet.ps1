@@ -50,6 +50,19 @@ function Deploy-OmniGetEnvironment {
         Write-Host "[SUCCESS] Added $binDir to Machine PATH." -ForegroundColor Green
     }
 
+    # Clean up legacy Ninite and redundant shortcuts
+    $desktops = @(
+        [System.Environment]::GetFolderPath('CommonDesktopDirectory'),
+        "C:\Users\samuelcaldas\Desktop",
+        "C:\Users\Administrator\Desktop"
+    )
+    foreach ($d in $desktops) {
+        if (Test-Path $d) {
+            Get-ChildItem -Path $d -Filter "Ninite App Store*.lnk" -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+            Get-ChildItem -Path $d -Filter "Server Configuration (sconfig).lnk" -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+        }
+    }
+
     # Deploy Desktop Shortcut in Public Desktop
     $publicDesktop = [System.Environment]::GetFolderPath('CommonDesktopDirectory')
     if (Test-Path $publicDesktop) {
