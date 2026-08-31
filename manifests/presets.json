@@ -1,0 +1,47 @@
+{
+  "DevStack": [
+    "vscode",
+    "git",
+    "nodejs",
+    "python",
+    "docker-cli",
+    "pwsh",
+    "gh",
+    "7zip",
+    "putty",
+    "winscp",
+    "terminal"
+  ],
+  "Browsers": [
+    "chrome",
+    "firefox",
+    "edge",
+    "brave"
+  ],
+  "Minimal": [
+    "7zip",
+    "notepadplusplus",
+    "chrome"
+  ],
+  "Utilities": [
+    "7zip",
+    "windirstat",
+    "wiztree",
+    "everything",
+    "teracopy",
+    "ccleaner"
+  ],
+  "SystemShells": [
+    "winxshell",
+    "winfile",
+    "terminal",
+    "hosts-adblock"
+  ],
+  "Media": [
+    "vlc",
+    "foobar",
+    "audacity",
+    "greenshot",
+    "spotify"
+  ]
+}

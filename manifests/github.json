@@ -1,0 +1,48 @@
+[
+  {
+    "id": "git",
+    "name": "Git for Windows",
+    "category": "Developer Tools",
+    "source": "github",
+    "version": "2.46.0",
+    "repo": "git-for-windows/git",
+    "url": "https://github.com/git-for-windows/git/releases/download/v2.46.0.windows.1/Git-2.46.0-64-bit.exe",
+    "desc": "Distributed version control system configured with long paths and LF line endings",
+    "silentArgs": "/VERYSILENT /NORESTART /NOCANCEL /SP- /CLOSEAPPLICATIONS",
+    "featured": true
+  },
+  {
+    "id": "gh",
+    "name": "GitHub CLI (gh)",
+    "category": "Developer Tools",
+    "source": "github",
+    "version": "2.98.0",
+    "repo": "cli/cli",
+    "url": "https://github.com/cli/cli/releases/download/v2.98.0/gh_2.98.0_windows_amd64.msi",
+    "desc": "Official command line tool for GitHub repos, issues, PRs, and workflows",
+    "featured": true
+  },
+  {
+    "id": "pwsh",
+    "name": "PowerShell 7",
+    "category": "Developer Tools",
+    "source": "github",
+    "version": "7.6.5",
+    "repo": "PowerShell/PowerShell",
+    "url": "https://github.com/PowerShell/PowerShell/releases/download/v7.6.5/PowerShell-7.6.5-win-x64.msi",
+    "desc": "Modern cross-platform automation and scripting shell engine",
+    "featured": true
+  },
+  {
+    "id": "openssh",
+    "name": "Win32-OpenSSH Server & Client",
+    "category": "Remote Access",
+    "source": "github",
+    "version": "9.5.0.0",
+    "repo": "PowerShell/Win32-OpenSSH",
+    "url": "https://github.com/PowerShell/Win32-OpenSSH/releases/download/v9.5.0.0p1-Beta/OpenSSH-Win64.zip",
+    "format": "zip",
+    "installPath": "C:\\Program Files\\OpenSSH",
+    "desc": "Official Win32 OpenSSH server and client tools"
+  }
+]

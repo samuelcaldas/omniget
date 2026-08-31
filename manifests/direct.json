@@ -1,0 +1,33 @@
+[
+  {
+    "id": "nodejs",
+    "name": "Node.js LTS",
+    "category": "Developer Tools",
+    "source": "direct",
+    "version": "20.17.0",
+    "url": "https://nodejs.org/dist/v20.17.0/node-v20.17.0-x64.msi",
+    "desc": "JavaScript runtime built on Chrome's V8 engine with npm package manager",
+    "featured": true
+  },
+  {
+    "id": "python",
+    "name": "Python 3.12",
+    "category": "Developer Tools",
+    "source": "direct",
+    "version": "3.12.5",
+    "url": "https://www.python.org/ftp/python/3.12.5/python-3.12.5-amd64.exe",
+    "silentArgs": "/quiet InstallAllUsers=1 PrependPath=1 Include_test=0 Include_pip=1",
+    "desc": "Official Python programming language runtime with pip package manager",
+    "featured": true
+  },
+  {
+    "id": "vcredist-all",
+    "name": "Visual C++ 2015-2022 Redistributable",
+    "category": "Runtimes",
+    "source": "direct",
+    "version": "14.40",
+    "url": "https://aka.ms/vs/17/release/vc_redist.x64.exe",
+    "silentArgs": "/install /quiet /norestart",
+    "desc": "Microsoft C/C++ runtime libraries for modern 64-bit applications"
+  }
+]

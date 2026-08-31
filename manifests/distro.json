@@ -1,0 +1,70 @@
+[
+  {
+    "id": "dotnet-sdk",
+    "name": ".NET 10.0 SDK",
+    "category": "Developer Tools",
+    "source": "distro",
+    "desc": "Microsoft .NET 10.0 Software Development Kit",
+    "recipe": "Install-DotNetSdk",
+    "featured": true
+  },
+  {
+    "id": "docker-cli",
+    "name": "Docker CLI & Docker Compose",
+    "category": "Developer Tools",
+    "source": "distro",
+    "desc": "Standalone native Docker and Compose CLI client for remote daemon contexts",
+    "recipe": "Install-DockerCli",
+    "featured": true
+  },
+  {
+    "id": "hosts-adblock",
+    "name": "Dan Pollock Hosts Adblock",
+    "category": "Security & Network",
+    "source": "distro",
+    "desc": "Zero-overhead 0.0.0.0 DNS blocking for ads, trackers, malware, and telemetry",
+    "recipe": "Install-HostsBlocklist"
+  },
+  {
+    "id": "winxshell",
+    "name": "WinXShell Desktop Environment",
+    "category": "Shells & UI",
+    "source": "distro",
+    "desc": "Lightweight Win32 desktop shell, start menu, and taskbar",
+    "recipe": "Install-WinXShell"
+  },
+  {
+    "id": "winfile",
+    "name": "Microsoft Windows File Manager",
+    "category": "Shells & UI",
+    "source": "distro",
+    "desc": "Classic open-source WinFile file manager",
+    "recipe": "Install-WinFile"
+  },
+  {
+    "id": "terminal",
+    "name": "Windows Terminal (WezTerm Engine)",
+    "category": "Shells & UI",
+    "source": "distro",
+    "desc": "Multi-tab terminal emulator with OpenGL software rendering",
+    "recipe": "Install-Terminal",
+    "featured": true
+  },
+  {
+    "id": "antigravity-daemon",
+    "name": "Antigravity Remote Control Daemon",
+    "category": "AI Agents & Remoting",
+    "source": "distro",
+    "desc": "Google Antigravity CLI daemon service listening on port 9090",
+    "recipe": "Install-AntigravityDaemon"
+  },
+  {
+    "id": "claude-code",
+    "name": "Claude Code CLI",
+    "category": "AI Agents & Remoting",
+    "source": "npm",
+    "packageName": "@anthropic-ai/claude-code",
+    "desc": "Anthropic Claude Code agentic CLI assistant",
+    "featured": true
+  }
+]
