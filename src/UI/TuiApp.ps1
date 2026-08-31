@@ -193,7 +193,7 @@ class TuiApp {
                             foreach ($pApp in $this.Presets[$pName]) { [void]$this.Selected.Add($pApp) }
                         }
                     }
-                    ([ConsoleKey]::OemQuestion) {
+                    { $_ -in @([ConsoleKey]::Oem2, [ConsoleKey]::Divide, [ConsoleKey]::F, [ConsoleKey]::S) -or $keyInfo.KeyChar -in @('/', '?') } {
                         [Console]::CursorVisible = $true
                         $this.SearchQuery = $this.ReadSearchInput()
                         [Console]::CursorVisible = $false
