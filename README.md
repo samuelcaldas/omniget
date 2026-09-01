@@ -13,7 +13,7 @@
 - **Multi-Source Aggregation**: Install software across multiple ecosystems using a single command:
   - 🌐 **Ninite Engine**: Generates dynamic multi-app bundles on-the-fly from 142+ curated applications.
   - 🐙 **GitHub Releases**: Fetches and installs latest releases for modern developer tools (PowerShell, GitHub CLI, WezTerm, etc.).
-  - 📦 **Direct Official Installers**: Silently executes official MSI, EXE, and ZIP installers (.NET SDK, Node.js, Python, Docker CLI).
+  - 📦 **Direct Official Installers**: Silently executes official MSI, EXE, and ZIP installers (.NET SDK, Node.js, Python, Docker CLI, Gitea CLI).
   - 🛠️ **Distro System Recipes**: Installs desktop shells (WinXShell, ReactShell, WinFile, Explorer++), VirtIO drivers, and zero-route DNS hosts blocklists.
 - **Modern ANSI Curses TUI**: Interactive Terminal User Interface for PowerShell 7 with live incremental search (`/`), category tabs, provider badges, preset selector, and batch execution.
 - **Universal & Lightweight**: Works natively on **Windows 10, Windows 11, Windows Server, and Windows Server Core** (including headless and WinPE environments).

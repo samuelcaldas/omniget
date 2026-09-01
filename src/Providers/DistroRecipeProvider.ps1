@@ -39,6 +39,25 @@ class DistroRecipeProvider : BaseProvider {
                 [System.Environment]::SetEnvironmentVariable('Path', "$dockerDir;" + [System.Environment]::GetEnvironmentVariable('Path', 'Machine'), 'Machine')
                 Remove-Item -Path $tempZip, $tempExtract -Recurse -Force -ErrorAction SilentlyContinue
             }
+            "Install-GiteaCli" {
+                $teaDir = "C:\Program Files\Gitea CLI"
+                if (-not (Test-Path $teaDir)) { New-Item -ItemType Directory -Path $teaDir -Force | Out-Null }
+                $teaUrl = "https://gitea.com/gitea/tea/releases/download/v0.15.1/tea-0.15.1-windows-amd64.exe"
+                $tempExe = "$env:TEMP\tea.exe"
+                $curl = "$env:WINDIR\System32\curl.exe"
+                if (Test-Path $curl) {
+                    & $curl -fSL "$teaUrl" -o "$tempExe"
+                } else {
+                    (New-Object System.Net.WebClient).DownloadFile($teaUrl, $tempExe)
+                }
+                Copy-Item -Path $tempExe -Destination "$teaDir\tea.exe" -Force
+                $currentPath = [System.Environment]::GetEnvironmentVariable('Path', 'Machine')
+                if ($currentPath -notlike "*$teaDir*") {
+                    [System.Environment]::SetEnvironmentVariable('Path', "$teaDir;$currentPath", 'Machine')
+                }
+                Remove-Item -Path $tempExe -Force -ErrorAction SilentlyContinue
+                Write-Host "[Distro] Gitea CLI (tea.exe) deployed to $teaDir." -ForegroundColor Green
+            }
             "Install-HostsBlocklist" {
                 $targetHosts = "$env:WINDIR\System32\drivers\etc\hosts"
                 $url = "https://someonewhocares.org/hosts/zero/hosts"

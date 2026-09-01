@@ -18,6 +18,15 @@
     "featured": true
   },
   {
+    "id": "gitea-cli",
+    "name": "Gitea CLI (tea)",
+    "category": "Developer Tools",
+    "source": "distro",
+    "desc": "Official command-line client for Gitea git servers (tea)",
+    "recipe": "Install-GiteaCli",
+    "featured": true
+  },
+  {
     "id": "hosts-adblock",
     "name": "Dan Pollock Hosts Adblock",
     "category": "Security & Network",
