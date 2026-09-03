@@ -29,7 +29,7 @@ flowchart LR
 When you connect to a Windows Core node via SSH:
 
 ```bash
-ssh -p 2222 samuelcaldas@127.0.0.1
+ssh -p 2222 username@127.0.0.1
 ```
 
 You are placed into a high-performance PowerShell 7 shell session. Because OmniGet is registered in the **Machine `PATH`**, the `og` command is immediately available:
