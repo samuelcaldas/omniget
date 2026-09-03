@@ -329,9 +329,9 @@ function Main {
     # 8. Package Installation (install / add / get or -Install)
     $pkgsToInstall = [System.Collections.Generic.List[string]]::new()
     if ($Install.Count -gt 0) {
-        $pkgsToInstall.AddRange($Install)
+        foreach ($item in $Install) { if (-not [string]::IsNullOrWhiteSpace($item)) { $pkgsToInstall.Add([string]$item) } }
     } elseif ($Command -in @("install", "add", "get")) {
-        $pkgsToInstall.AddRange($cleanArgs)
+        foreach ($item in $cleanArgs) { if (-not [string]::IsNullOrWhiteSpace($item)) { $pkgsToInstall.Add([string]$item) } }
     }
 
     if ($pkgsToInstall.Count -gt 0) {
