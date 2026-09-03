@@ -143,9 +143,8 @@ function Execute-PackageBatch {
     Write-Host "  OMNIGET BATCH EXECUTION ($($PackageIds.Count) packages)" -ForegroundColor White
     Write-Host "==============================================================================" -ForegroundColor Cyan
 
-    foreach ($kv in $grouped) {
-        $sourceName = $kv.Key
-        $packages = $kv.Value.ToArray()
+    foreach ($sourceName in $grouped.Keys) {
+        $packages = $grouped[$sourceName].ToArray()
         $provider = Get-OmniProvider -SourceName $sourceName
 
         Write-Host "`n>>> Running Provider: $($provider.DisplayName) ($($packages.Count) packages)..." -ForegroundColor Cyan
