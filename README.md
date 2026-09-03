@@ -3,6 +3,7 @@
 [![PowerShell 7](https://img.shields.io/badge/PowerShell-7%2B-blue.svg?logo=powershell)](https://github.com/PowerShell/PowerShell)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20%7C%20Server%20%7C%20Core-0078D6?logo=windows)](https://microsoft.com/windows)
+[![Wiki Documentation](https://img.shields.io/badge/Docs-Wiki-brightgreen.svg?logo=gitbook)](wiki/Home.md)
 
 **OmniGet** (`og`) is an ultra-fast, multi-source package manager and interactive terminal store for Windows. It seamlessly aggregates and automates software installations across **Ninite**, **GitHub Releases**, **Official Direct Packages**, **Distro Recipes**, and **Global Runtimes** with zero bloatware and zero telemetry.
 
@@ -107,6 +108,23 @@ src/
     ├── TuiApp.ps1             # Main ANSI multi-panel interactive loop
     └── SearchEngine.ps1       # Fuzzy filter engine across all fields
 ```
+
+---
+ 
+## 📚 Documentation & Wiki
+
+Detailed architectural documentation, comprehensive CLI manuals, and authoring guides are available in the **[OmniGet Wiki](wiki/Home.md)**:
+
+- 🚀 **[Getting Started Guide](wiki/Getting-Started.md)**: Installation methods, system requirements, and first-run verification.
+- 💻 **[CLI Reference](wiki/CLI-Reference.md)**: Subcommand syntax, flags (`-s`, `-y`), and automation scripting.
+- 🎮 **[TUI User Guide](wiki/TUI-User-Guide.md)**: Interactive curses interface, Vim keybindings, search, and category tabs.
+- 🌐 **[Providers & Sources](wiki/Providers-and-Sources.md)**: Deep dive into Ninite bundling, GitHub Releases, Direct vendor installers, Distro recipes, and NPM.
+- 📦 **[Presets & Bundles](wiki/Presets-and-Bundles.md)**: Curated software stacks (`DevStack`, `Browsers`, `Minimal`, `Utilities`, `SystemShells`, `Media`).
+- ⚙️ **[Architecture & Design Patterns](wiki/Architecture-and-Design-Patterns.md)**: Strategy & Factory patterns, SOLID principles, and Object Calisthenics.
+- ⚡ **[Zero-Downtime Updates](wiki/Zero-Downtime-Updates.md)**: In-use binary hot-swap rotation and Windows Restart Manager suppression.
+- 📝 **[Manifest Authoring Guide](wiki/Manifest-Authoring-Guide.md)**: JSON catalog schema and step-by-step contribution instructions.
+- 🖥️ **[Headless & Windows Server Core](wiki/Headless-and-Windows-Core-Deployment.md)**: OpenSSH remoting, unattended ISO deployment, and WinRM automation.
+- 🔧 **[Troubleshooting & FAQ](wiki/Troubleshooting-and-FAQ.md)**: Common questions and diagnostic procedures.
 
 ---
 
