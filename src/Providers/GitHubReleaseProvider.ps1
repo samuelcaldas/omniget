@@ -43,6 +43,7 @@ class GitHubReleaseProvider : BaseProvider {
                 $targetDir = if ($Package.InstallPath) { $Package.InstallPath } else { "C:\Program Files\$($Package.Name)" }
                 $parentDir = Split-Path -Parent $targetDir
                 if (-not (Test-Path $parentDir)) { New-Item -ItemType Directory -Path $parentDir -Force | Out-Null }
+                if (-not (Test-Path $targetDir)) { New-Item -ItemType Directory -Path $targetDir -Force | Out-Null }
 
                 $stagingDir = "$targetDir.tmp_$([System.Guid]::NewGuid().ToString('N'))"
                 New-Item -ItemType Directory -Path $stagingDir -Force | Out-Null
@@ -51,28 +52,48 @@ class GitHubReleaseProvider : BaseProvider {
                     Write-Host "[GitHub] Extracting to staging area..." -ForegroundColor Cyan
                     Expand-Archive -Path $tempFile -DestinationPath $stagingDir -Force
 
-                    if (Test-Path $targetDir) {
-                        $timestamp = [DateTime]::UtcNow.ToString('yyyyMMdd_HHmmss')
-                        $targetLeaf = Split-Path -Leaf $targetDir
-                        $oldDirName = "$targetLeaf.old_$timestamp"
-                        Write-Host "[GitHub] Zero-downtime rotation: rotating active directory to $oldDirName..." -ForegroundColor Cyan
-                        Rename-Item -Path $targetDir -NewName $oldDirName -Force
+                    Write-Host "[GitHub] Zero-downtime hot-swap: deploying files to $targetDir..." -ForegroundColor Cyan
+                    $timestamp = [DateTime]::UtcNow.ToString('yyyyMMdd_HHmmss')
+
+                    # Create directories
+                    Get-ChildItem -Path $stagingDir -Recurse -Directory | ForEach-Object {
+                        $rel = $_.FullName.Substring($stagingDir.Length).TrimStart('\', '/')
+                        $destD = Join-Path $targetDir $rel
+                        if (-not (Test-Path $destD)) { New-Item -ItemType Directory -Path $destD -Force | Out-Null }
                     }
 
-                    Rename-Item -Path $stagingDir -NewName (Split-Path -Leaf $targetDir) -Force
-                    Write-Host "[GitHub] Successfully activated $targetDir." -ForegroundColor Cyan
-
-                    # Housekeeping: attempt to remove old rotated directories if no longer locked
-                    if (Test-Path $parentDir) {
-                        $targetLeaf = Split-Path -Leaf $targetDir
-                        Get-ChildItem -Path $parentDir -Directory -Filter "$targetLeaf.old_*" -ErrorAction SilentlyContinue | ForEach-Object {
-                            Remove-Item -Path $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
+                    # Deploy files with in-use rotation
+                    Get-ChildItem -Path $stagingDir -Recurse -File | ForEach-Object {
+                        $rel = $_.FullName.Substring($stagingDir.Length).TrimStart('\', '/')
+                        $destF = Join-Path $targetDir $rel
+                        if (Test-Path $destF) {
+                            try {
+                                Copy-Item -Path $_.FullName -Destination $destF -Force -ErrorAction Stop
+                            }
+                            catch {
+                                # In-use locked binary or DLL: rotate to .old_<timestamp> and copy new
+                                $oldF = "$destF.old_$timestamp"
+                                Rename-Item -Path $destF -NewName (Split-Path -Leaf $oldF) -Force
+                                Copy-Item -Path $_.FullName -Destination $destF -Force
+                            }
+                        }
+                        else {
+                            Copy-Item -Path $_.FullName -Destination $destF -Force
                         }
                     }
+
+                    # Housekeeping: clean up old rotated files if no longer locked
+                    Get-ChildItem -Path $targetDir -Recurse -Filter "*.old_*" -ErrorAction SilentlyContinue | ForEach-Object {
+                        Remove-Item -Path $_.FullName -Force -ErrorAction SilentlyContinue
+                    }
+                    Write-Host "[GitHub] Successfully deployed $targetDir without process disruption." -ForegroundColor Cyan
                 }
                 catch {
                     if (Test-Path $stagingDir) { Remove-Item -Path $stagingDir -Recurse -Force -ErrorAction SilentlyContinue }
                     throw
+                }
+                finally {
+                    if (Test-Path $stagingDir) { Remove-Item -Path $stagingDir -Recurse -Force -ErrorAction SilentlyContinue }
                 }
             }
             else {
