@@ -56,35 +56,44 @@ class GitHubReleaseProvider : BaseProvider {
                     $timestamp = [DateTime]::UtcNow.ToString('yyyyMMdd_HHmmss')
 
                     # Create directories
-                    Get-ChildItem -Path $stagingDir -Recurse -Directory | ForEach-Object {
-                        $rel = $_.FullName.Substring($stagingDir.Length).TrimStart('\', '/')
-                        $destD = Join-Path $targetDir $rel
-                        if (-not (Test-Path $destD)) { New-Item -ItemType Directory -Path $destD -Force | Out-Null }
+                    $allDirs = @(Get-ChildItem -Path $stagingDir -Recurse -Directory -ErrorAction SilentlyContinue)
+                    foreach ($dirItem in $allDirs) {
+                        if ($null -ne $dirItem) {
+                            $rel = $dirItem.FullName.Substring($stagingDir.Length).TrimStart('\', '/')
+                            $destD = Join-Path $targetDir $rel
+                            if (-not (Test-Path $destD)) { New-Item -ItemType Directory -Path $destD -Force | Out-Null }
+                        }
                     }
 
                     # Deploy files with in-use rotation
-                    Get-ChildItem -Path $stagingDir -Recurse -File | ForEach-Object {
-                        $rel = $_.FullName.Substring($stagingDir.Length).TrimStart('\', '/')
-                        $destF = Join-Path $targetDir $rel
-                        if (Test-Path $destF) {
-                            try {
-                                Copy-Item -Path $_.FullName -Destination $destF -Force -ErrorAction Stop
+                    $allFiles = @(Get-ChildItem -Path $stagingDir -Recurse -File -ErrorAction SilentlyContinue)
+                    foreach ($fileItem in $allFiles) {
+                        if ($null -ne $fileItem) {
+                            $rel = $fileItem.FullName.Substring($stagingDir.Length).TrimStart('\', '/')
+                            $destF = Join-Path $targetDir $rel
+                            if (Test-Path $destF) {
+                                try {
+                                    Copy-Item -Path $fileItem.FullName -Destination $destF -Force -ErrorAction Stop
+                                }
+                                catch {
+                                    # In-use locked binary or DLL: rotate to .old_<timestamp> and copy new
+                                    $oldF = "$destF.old_$timestamp"
+                                    Rename-Item -Path $destF -NewName (Split-Path -Leaf $oldF) -Force
+                                    Copy-Item -Path $fileItem.FullName -Destination $destF -Force
+                                }
                             }
-                            catch {
-                                # In-use locked binary or DLL: rotate to .old_<timestamp> and copy new
-                                $oldF = "$destF.old_$timestamp"
-                                Rename-Item -Path $destF -NewName (Split-Path -Leaf $oldF) -Force
-                                Copy-Item -Path $_.FullName -Destination $destF -Force
+                            else {
+                                Copy-Item -Path $fileItem.FullName -Destination $destF -Force
                             }
-                        }
-                        else {
-                            Copy-Item -Path $_.FullName -Destination $destF -Force
                         }
                     }
 
                     # Housekeeping: clean up old rotated files if no longer locked
-                    Get-ChildItem -Path $targetDir -Recurse -Filter "*.old_*" -ErrorAction SilentlyContinue | ForEach-Object {
-                        Remove-Item -Path $_.FullName -Force -ErrorAction SilentlyContinue
+                    $oldFiles = @(Get-ChildItem -Path $targetDir -Recurse -Filter "*.old_*" -ErrorAction SilentlyContinue)
+                    foreach ($oldItem in $oldFiles) {
+                        if ($null -ne $oldItem) {
+                            Remove-Item -Path $oldItem.FullName -Force -ErrorAction SilentlyContinue
+                        }
                     }
                     Write-Host "[GitHub] Successfully deployed $targetDir without process disruption." -ForegroundColor Cyan
                 }
