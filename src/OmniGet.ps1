@@ -23,14 +23,31 @@ param(
     [string[]]$Arguments = @(),
 
     # Backward compatibility parameter switches
+    [Alias('i')]
     [string[]]$Install = @(),
+
+    [Alias('p')]
     [string]$Preset = "",
+
     [string]$Search = "",
+
+    [Alias('l')]
     [string]$List = "",
+
+    [Alias('s')]
     [switch]$Silent,
+
+    [Alias('d')]
     [switch]$Deploy,
+
+    [Alias('v')]
     [switch]$Version,
-    [switch]$Help
+
+    [Alias('h')]
+    [switch]$Help,
+
+    [Alias('y')]
+    [switch]$Yes
 )
 
 $ErrorActionPreference = 'Stop'
