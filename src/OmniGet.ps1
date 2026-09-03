@@ -2,29 +2,35 @@
 .SYNOPSIS
     OmniGet (og) — Universal Multi-Source Package Engine for Windows.
 .DESCRIPTION
-    Main CLI and TUI orchestrator executing package downloads, silent installs, and batch recipes.
-.PARAMETER Install
-    Array of package IDs to install directly.
-.PARAMETER Preset
-    Predefined preset name to execute (e.g. DevStack, Browsers, Minimal, Utilities).
-.PARAMETER Search
-    Search query to execute from the command line.
-.PARAMETER List
-    Lists packages optionally filtered by source (ninite, github, direct, distro, all).
-.PARAMETER Silent
-    Suppresses interactive confirmation prompts.
-.PARAMETER Deploy
-    Deploys og/omniget CLI shortcuts and environment PATH.
+    Main CLI and TUI orchestrator executing package downloads, silent installs, batch presets,
+    manifest self-updates, and environment deployment.
+.EXAMPLE
+    og
+    og search git
+    og install git nodejs -s
+    og list github
+    og preset DevStack -s
+    og update
+    og version
+    og help
 #>
 [CmdletBinding()]
 param(
+    [Parameter(Position = 0)]
+    [string]$Command = "",
+
+    [Parameter(Position = 1, ValueFromRemainingArguments = $true)]
+    [string[]]$Arguments = @(),
+
+    # Backward compatibility parameter switches
     [string[]]$Install = @(),
     [string]$Preset = "",
     [string]$Search = "",
     [string]$List = "",
     [switch]$Silent,
     [switch]$Deploy,
-    [switch]$Version
+    [switch]$Version,
+    [switch]$Help
 )
 
 $ErrorActionPreference = 'Stop'
@@ -137,24 +143,134 @@ function Execute-PackageBatch {
     Write-Host "`n[SUCCESS] OmniGet batch installation completed." -ForegroundColor Green
 }
 
+function Show-UsageHelp {
+    Write-Host @"
+
+OmniGet (og) — Universal Multi-Source Package Engine for Windows
+Version 1.0.0
+
+USAGE:
+    og [COMMAND] [OPTIONS] [ARGUMENTS...]
+
+COMMANDS:
+    (none)                          Launch interactive App Store (ANSI TUI)
+    search, find <query>            Search for packages across all sources
+    install, add, get <pkg...>      Install one or more packages
+    list, ls [source]               List packages (ninite, github, direct, distro, all)
+    preset <name>                   Install predefined package preset (e.g. DevStack)
+    update, upgrade                 Update OmniGet engine and manifests to latest release
+    deploy                          Register 'og' in system PATH and create shortcuts
+    version, -v, --version          Display current OmniGet version
+    help, -h, --help                Display this help documentation
+
+OPTIONS:
+    -s, --silent, -Silent           Run installations silently without prompts
+    -y, --yes                       Assume 'yes' to all installation prompts
+
+PRESETS:
+    DevStack, Browsers, Minimal, Utilities, SystemShells, Media
+
+EXAMPLES:
+    og
+    og search git
+    og install git gh pwsh -s
+    og list github
+    og preset DevStack -s
+    og update
+"@ -ForegroundColor Cyan
+}
+
+function Update-OmniGetEngine {
+    Write-Host "`n==============================================================================" -ForegroundColor Cyan
+    Write-Host "  OMNIGET SELF-UPDATE & MANIFEST SYNCHRONIZATION" -ForegroundColor White
+    Write-Host "==============================================================================" -ForegroundColor Cyan
+    Write-Host "[INFO] Checking for latest release from GitHub..." -ForegroundColor Cyan
+
+    $zipUrl = "https://github.com/samuelcaldas/omniget/archive/refs/heads/main.zip"
+    $tempZip = "$env:TEMP\omniget_update_$([System.Guid]::NewGuid().ToString('N')).zip"
+    $extractDir = "$env:TEMP\omniget_extract_$([System.Guid]::NewGuid().ToString('N'))"
+    $curl = "$env:WINDIR\System32\curl.exe"
+
+    try {
+        if (Test-Path $curl) {
+            & $curl -fSL "$zipUrl" -o "$tempZip"
+        } else {
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
+            (New-Object System.Net.WebClient).DownloadFile($zipUrl, $tempZip)
+        }
+
+        if (-not (Test-Path $tempZip) -or (Get-Item $tempZip).Length -eq 0) {
+            throw "Failed to download update archive from $zipUrl"
+        }
+
+        Write-Host "[INFO] Extracting update files..." -ForegroundColor Cyan
+        Expand-Archive -Path $tempZip -DestinationPath $extractDir -Force
+        $srcRoot = Join-Path $extractDir "omniget-main"
+        if (-not (Test-Path $srcRoot)) { $srcRoot = $extractDir }
+
+        # Synchronize manifests, src, bin directories
+        foreach ($sub in @("manifests", "src", "bin")) {
+            $srcSub = Join-Path $srcRoot $sub
+            $dstSub = Join-Path $OmniRoot $sub
+            if (Test-Path $srcSub) {
+                if (-not (Test-Path $dstSub)) { New-Item -ItemType Directory -Path $dstSub -Force | Out-Null }
+                Copy-Item -Path "$srcSub\*" -Destination $dstSub -Recurse -Force
+            }
+        }
+
+        foreach ($doc in @("README.md", "LICENSE")) {
+            $srcDoc = Join-Path $srcRoot $doc
+            if (Test-Path $srcDoc) { Copy-Item -Path $srcDoc -Destination $OmniRoot -Force }
+        }
+
+        Deploy-OmniGetEnvironment
+        Write-Host "`n[SUCCESS] OmniGet core engine and manifests updated successfully." -ForegroundColor Green
+    }
+    catch {
+        Write-Host "`n[ERROR] OmniGet update failed: $_" -ForegroundColor Red
+    }
+    finally {
+        Remove-Item -Path $tempZip, $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
 function Main {
-    if ($Version) {
+    # 1. Version check
+    if ($Version -or $Command -in @("version", "-v", "--version", "-version")) {
         Write-Host "OmniGet (og) version 1.0.0"
         return
     }
 
-    if ($Deploy) {
+    # 2. Help check
+    if ($Help -or $Command -in @("help", "-h", "--help", "-help", "?", "-?")) {
+        Show-UsageHelp
+        return
+    }
+
+    # 3. Deploy check
+    if ($Deploy -or $Command -eq "deploy") {
         Deploy-OmniGetEnvironment
         return
     }
 
+    # 4. Self-update check
+    if ($Command -in @("update", "upgrade")) {
+        Update-OmniGetEngine
+        return
+    }
+
+    # Parse silent / yes flags from Arguments
+    $isSilent = $Silent.IsPresent -or ($Arguments -contains "-s") -or ($Arguments -contains "--silent") -or ($Arguments -contains "-y") -or ($Arguments -contains "--yes")
+    $cleanArgs = @($Arguments | Where-Object { $_ -notmatch '^-{1,2}(s|silent|y|yes)$' })
+
     $allPackages = [ManifestReader]::LoadAllPackages($ManifestsDir)
     $presets = [ManifestReader]::LoadPresets($ManifestsDir)
 
-    # 1. CLI Search
-    if (-not [string]::IsNullOrWhiteSpace($Search)) {
-        $results = [SearchEngine]::Filter($Search, $allPackages)
-        Write-Host "`nSearch results for '$Search' ($($results.Count) matches):" -ForegroundColor Cyan
+    # 5. CLI Search
+    $searchQuery = if (-not [string]::IsNullOrWhiteSpace($Search)) { $Search } elseif ($Command -in @("search", "find") -and $cleanArgs.Count -gt 0) { $cleanArgs -join " " } else { "" }
+    if (-not [string]::IsNullOrWhiteSpace($searchQuery)) {
+        $results = [SearchEngine]::Filter($searchQuery, $allPackages)
+        Write-Host "`nSearch results for '$searchQuery' ($($results.Count) matches):" -ForegroundColor Cyan
         foreach ($r in $results) {
             $line = "  • {0,-18} [{1,-6}] - {2}" -f $r.Id, $r.Source.ToUpper(), $r.Desc
             Write-Host $line -ForegroundColor White
@@ -162,9 +278,10 @@ function Main {
         return
     }
 
-    # 2. CLI List
-    if ($PSBoundParameters.ContainsKey('List')) {
-        $filter = $List.ToLower()
+    # 6. CLI List
+    $listFilter = if ($PSBoundParameters.ContainsKey('List')) { $List } elseif ($Command -in @("list", "ls")) { if ($cleanArgs.Count -gt 0) { $cleanArgs[0] } else { "all" } } else { $null }
+    if ($null -ne $listFilter) {
+        $filter = $listFilter.ToLower()
         $filtered = if ($filter -and $filter -ne "all") {
             @($allPackages | Where-Object { $_.Source -eq $filter })
         } else {
@@ -178,32 +295,52 @@ function Main {
         return
     }
 
-    # 3. Direct Package Installation
-    if ($Install.Count -gt 0) {
-        Execute-PackageBatch -PackageIds $Install -Catalog $allPackages -SilentMode $Silent
-        return
-    }
-
-    # 4. Preset Installation
-    if (-not [string]::IsNullOrWhiteSpace($Preset)) {
-        if ($presets.ContainsKey($Preset)) {
-            $presetApps = $presets[$Preset]
-            Write-Host "[INFO] Selected Preset '$Preset': $($presetApps -join ', ')" -ForegroundColor Cyan
-            Execute-PackageBatch -PackageIds $presetApps -Catalog $allPackages -SilentMode $Silent
+    # 7. Preset Installation
+    $presetName = if (-not [string]::IsNullOrWhiteSpace($Preset)) { $Preset } elseif ($Command -eq "preset" -and $cleanArgs.Count -gt 0) { $cleanArgs[0] } else { "" }
+    if (-not [string]::IsNullOrWhiteSpace($presetName)) {
+        if ($presets.ContainsKey($presetName)) {
+            $presetApps = $presets[$presetName]
+            Write-Host "[INFO] Selected Preset '$presetName': $($presetApps -join ', ')" -ForegroundColor Cyan
+            Execute-PackageBatch -PackageIds $presetApps -Catalog $allPackages -SilentMode $isSilent
             return
         } else {
-            Write-Host "[ERROR] Unknown preset: '$Preset'. Available: $($presets.Keys -join ', ')" -ForegroundColor Red
+            Write-Host "[ERROR] Unknown preset: '$presetName'. Available: $($presets.Keys -join ', ')" -ForegroundColor Red
             return
         }
     }
 
-    # 5. Interactive ANSI TUI Mode
+    # 8. Package Installation (install / add / get or -Install)
+    $pkgsToInstall = [System.Collections.Generic.List[string]]::new()
+    if ($Install.Count -gt 0) {
+        $pkgsToInstall.AddRange($Install)
+    } elseif ($Command -in @("install", "add", "get")) {
+        $pkgsToInstall.AddRange($cleanArgs)
+    }
+
+    if ($pkgsToInstall.Count -gt 0) {
+        Execute-PackageBatch -PackageIds $pkgsToInstall.ToArray() -Catalog $allPackages -SilentMode $isSilent
+        return
+    }
+
+    # 9. If an unknown command was provided
+    if (-not [string]::IsNullOrWhiteSpace($Command)) {
+        # Check if the command matches a package ID directly (e.g. 'og git')
+        $matching = @($allPackages | Where-Object { $_.Id -eq $Command.ToLower() })
+        if ($matching.Count -gt 0) {
+            Execute-PackageBatch -PackageIds @($Command) -Catalog $allPackages -SilentMode $isSilent
+            return
+        }
+        Write-Host "[ERROR] Unknown command '$Command'. Run 'og help' for usage instructions." -ForegroundColor Red
+        return
+    }
+
+    # 10. Interactive ANSI TUI Mode (default when no arguments)
     Deploy-OmniGetEnvironment
     $app = [TuiApp]::new($allPackages, $presets, @())
     $selected = $app.Run()
 
     if ($selected.Count -gt 0) {
-        Execute-PackageBatch -PackageIds $selected -Catalog $allPackages -SilentMode $Silent
+        Execute-PackageBatch -PackageIds $selected -Catalog $allPackages -SilentMode $isSilent
     } else {
         Write-Host "`n[INFO] OmniGet session exited." -ForegroundColor Gray
     }

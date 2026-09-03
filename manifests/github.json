@@ -29,7 +29,9 @@
     "source": "github",
     "version": "7.6.5",
     "repo": "PowerShell/PowerShell",
-    "url": "https://github.com/PowerShell/PowerShell/releases/download/v7.6.5/PowerShell-7.6.5-win-x64.msi",
+    "url": "https://github.com/PowerShell/PowerShell/releases/download/v7.6.5/PowerShell-7.6.5-win-x64.zip",
+    "format": "zip",
+    "installPath": "C:\\Program Files\\PowerShell\\7",
     "desc": "Modern cross-platform automation and scripting shell engine",
     "featured": true
   },
